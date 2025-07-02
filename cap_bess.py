@@ -8,7 +8,7 @@ st.set_page_config(page_title="Dashboard Consumo com BESS", layout="wide")
 plt.style.use('dark_background')
 
 pasta = r"C:\Users\vinic\OneDrive - DSolar\DSOLAR\Projetos RCT\Projetos\Teste"
-arquivo = os.path.join(pasta, "analise_diaria_bess_corrigida.xlsx")
+arquivo = "analise_diaria_bess_corrigida.xlsx"
 
 @st.cache_data
 def carregar_dados(caminho):
