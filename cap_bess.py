@@ -81,36 +81,42 @@ def plot_grafico_mensal(df, capacidade_bateria):
         st.pyplot(fig)
         plt.close()
 
-def plot_reducao_percentual(df, capacidade_bateria):
-    resumo_mensal = df.groupby('AnoMes').agg({
-        'Consumo (kWh)': 'sum'
-    }).reset_index()
+# --- Novo: cálculo da redução percentual diária ---
+def calcula_reducao_diaria(df):
+    # % redução = 100 * (1 - energia BESS / consumo)
+    df['Reducao Percentual Diaria (%)'] = 100 * (1 - df['Energia BESS (kWh)'] / df['Consumo (kWh)'])
+    df['Reducao Percentual Diaria (%)'] = df['Reducao Percentual Diaria (%)'].clip(lower=0, upper=100)
+    return df
 
-    resumo_mensal['Consumo Com BESS (kWh)'] = resumo_mensal['Consumo (kWh)'] - capacidade_bateria
-    resumo_mensal['Consumo Com BESS (kWh)'] = resumo_mensal['Consumo Com BESS (kWh)'].clip(lower=0)
-
-    resumo_mensal['Reducao Percentual (%)'] = 100 * (resumo_mensal['Consumo (kWh)'] - resumo_mensal['Consumo Com BESS (kWh)']) / resumo_mensal['Consumo (kWh)']
+# --- Gráfico de redução percentual mensal ajustado ---
+def plot_reducao_percentual_mensal(df):
+    # calcula média da redução diária por mês
+    resumo_mensal = df.groupby('AnoMes')['Reducao Percentual Diaria (%)'].mean().reset_index()
 
     fig, ax = plt.subplots(figsize=(12,6))
     fig.patch.set_facecolor('black')
 
-    ax.bar(resumo_mensal['AnoMes'], resumo_mensal['Reducao Percentual (%)'], color='#32CD32', edgecolor='#228B22', linewidth=1.5)
+    ax.bar(resumo_mensal['AnoMes'], resumo_mensal['Reducao Percentual Diaria (%)'],
+           color='#32CD32', edgecolor='#228B22', linewidth=1.5)
 
     ax.set_facecolor('black')
-    ax.set_title('Redução Percentual Mensal do Consumo com BESS', color='lime', fontsize=16)
+    ax.set_title('Média Mensal da Redução Percentual Diária com BESS', color='lime', fontsize=16)
     ax.set_xlabel('Mês', color='lime', fontsize=14)
-    ax.set_ylabel('Redução (%)', color='lime', fontsize=14)
+    ax.set_ylabel('Redução Percentual Média (%)', color='lime', fontsize=14)
     ax.tick_params(axis='x', rotation=45, colors='lime')
     ax.tick_params(axis='y', colors='lime')
 
-    for i, valor in enumerate(resumo_mensal['Reducao Percentual (%)']):
+    for i, valor in enumerate(resumo_mensal['Reducao Percentual Diaria (%)']):
         ax.text(i, valor + 0.5, f'{valor:.1f}%', ha='center', va='bottom', color='white', fontsize=10, fontweight='bold')
 
     st.pyplot(fig)
     plt.close()
 
+# --- Aplica cálculo da redução diária no dataframe ---
+df = calcula_reducao_diaria(df)
+
 st.header("Gráficos Mensais de Consumo")
 plot_grafico_mensal(df, capacidade_bateria)
 
 st.header("Redução Percentual Mensal")
-plot_reducao_percentual(df, capacidade_bateria)
+plot_reducao_percentual_mensal(df)
