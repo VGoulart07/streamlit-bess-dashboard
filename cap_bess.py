@@ -29,7 +29,7 @@ st.title("Dashboard Consumo com BESS")
 st.markdown("Visualização do consumo com e sem BESS, além da redução percentual mensal.")
 
 capacidade_bateria = st.slider("Capacidade total útil da bateria (kWh):", 
-                              min_value=0.0, max_value=5000.0, value=1258.2, step=10.0)
+                              min_value=0.0, max_value=5000.0, value=1233.03, step=10.0)
 
 # --- Cálculo da redução percentual total considerando a capacidade atual ---
 consumo_total = df['Consumo (kWh)'].sum()
